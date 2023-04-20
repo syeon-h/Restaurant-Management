@@ -1,0 +1,174 @@
+drop database if exists restaurantDB;
+create database restaurantDB; 
+
+use restaurantDB; 
+
+create table Customer (
+	email varchar(50) primary key, 
+	street varchar(50), 
+	city varchar(50), 
+	pc char(6), 
+	first_name varchar(50), 
+	last_name varchar(50), 
+	phone varchar(10)); 
+
+create table Payment (
+	customerID varchar(50) not null, 
+	credit float default 5.0, 
+	payment_amount float default 0.0, 
+	last_date date default current_timestamp, 
+	primary key (customerID, payment_amount, last_date), 
+	foreign key (customerID) references Customer(email) on delete cascade); 
+
+create table Employee (
+	ID integer not null auto_increment primary key, 
+	role varchar(50), 
+	first_name varchar(50), 
+	last_name varchar(50),
+	email varchar(50)); 
+
+create table Credential ( 
+	chefID integer not null, 
+	credential varchar(50), 
+	primary key (chefID, credential), 
+	foreign key (chefID) references Employee(ID) on delete cascade); 
+
+create table Relationship ( 
+	customerID varchar(50) not null, 
+	employeeID integer not null, 
+	relationship varchar(100), 
+	primary key (employeeID, customerID), 
+	foreign key (employeeID) references Employee(ID) on delete cascade, 
+	foreign key (customerID) references Customer(email) on delete cascade); 
+
+create table Schedule ( 
+	employeeID integer not null, 
+	date date, 
+	start time, 
+	end time, 
+	primary key (employeeID, date), 
+	foreign key (employeeID) references Employee(ID) on delete cascade); 
+
+create table Restaurant (
+	name varchar(50) primary key, 
+	URL varchar(50), 
+	street varchar(50), 
+	city varchar(50), 
+	pc char(6), 
+	managerID integer not null, 
+	foreign key (managerID) references Employee(ID) on delete restrict); 
+
+create table Menu ( 
+	name varchar(50) not null, 
+	restaurant_name varchar(50) not null, 
+	price float not null, 
+	primary key(name, restaurant_name), 
+	foreign key (restaurant_name) references Restaurant(name) on delete cascade); 
+
+create table `Order` ( 
+	ID integer not null auto_increment primary key, 
+	customerID varchar(50) not null, 
+	restaurantID varchar(50) not null, 
+	tip float, 
+	total_amount float, 
+	order_date date, 
+	deliveryID integer, 
+	delivery_time time, 
+	foreign key (customerID) references Customer(email) on delete restrict, 
+	foreign key (restaurantID) references Restaurant(name) on delete cascade, 
+	foreign key (deliveryID) references Employee(ID) on delete restrict); 
+
+create table Order_Detail ( 
+	orderID integer not null, 
+	restaurantID varchar(50) not null, 
+	menu varchar(50) not null, 
+	primary key (orderID, menu), 
+	foreign key (orderID) references `Order`(ID) on delete cascade, 
+	foreign key (restaurantID) references Restaurant(name) on delete cascade, 
+	foreign key (menu) references Menu(name) on delete restrict); 
+
+insert into Customer values 
+('customer1@test.com', '1 University Avenue', 'Kingston', 'K1K1K1', 'Alysha', 'Fred', '1111111111'), 
+('customer2@test.com', '2 University Avenue', 'Kingston', 'K2K2K2', 'Aurelius', 'Hippolyte', '2222222222'),
+('customer3@test.com', '3 University Avenue', 'Kingston', 'K3K3K3', 'Gabriel', 'Allen', '3333333333'),
+('customer4@test.com', '4 University Avenue', 'Kingston', 'K4K4K4', 'Opal', 'Juliet', '4444444444'),
+('customer5@test.com', '5 University Avenue', 'Kingston', 'K5K5K5', 'Stewart', 'Baylor', '555555555'),
+('customer6@test.com', '6 University Avenue', 'Kingston', 'K6K6K6', 'Winnie', 'China', '6666666666'); 
+
+insert into Payment values 
+('customer1@test.com', default, 19.20, '2022-01-01'), 
+('customer2@test.com', default, 80.00, '2022-01-02'), 
+('customer3@test.com', default, 72.34, '2022-01-03'), 
+('customer4@test.com', default, 69.99, '2022-01-04'), 
+('customer5@test.com', default, 20.50, '2022-01-05'), 
+('customer6@test.com', default, 0.01, '2022-01-01'); 
+
+insert into Employee (role, first_name, last_name, email) values 
+('Management', 'John', 'Smith', 'employee1@test.com'),
+('Management', 'Franklin', 'Wong', 'employee2@test.com'),
+('Management', 'Alicia', 'Zelaya', 'employee3@test.com'),
+('Management', 'Jennifer', 'Wallace', 'employee4@test.com'),
+('Management', 'Ramesh', 'Narayan', 'employee5@test.com'),
+('Management', 'Joyce', 'English', 'employee6@test.com'),
+('Delivery', 'Ahmad', 'Jabbar', 'employee7@test.com'),
+('Chef', 'James', 'Borg', 'employee8@test.com'), 
+('Server', 'Stevie', 'Sinclair', 'employee9@test.com'); 
+
+insert into Credential values 
+(8, 'Certified Foodservice Professional'),
+(8, 'Master Certified Food Executive'),
+(8, 'Certified Chef de Cuisine'),
+(8, 'Certified Personal Chef'),
+(8, 'Certified Executive Chef'),
+(8, 'Certified Master Chef'); 
+
+insert into Relationship values 
+('customer1@test.com', 1, 'Relationship description1'), 
+('customer2@test.com', 1, 'Relationship description2'), 
+('customer1@test.com', 2, 'Relationship description3'), 
+('customer3@test.com', 5, 'Relationship description4'), 
+('customer5@test.com', 6, 'Relationship description5'), 
+('customer1@test.com', 9, 'Relationship description6'); 
+
+insert into Schedule values 
+(1, '2022-02-01', '14:00:00', '18:59:59'), 
+(1, '2022-02-02', '00:00:00', '18:00:00'), 
+(1, '2023-03-04', '17:40:32', '21:40:34'), 
+(1, '2023-03-05', '17:40:32', '21:40:34'), 
+(2, '2022-02-01', '14:15:00', '19:30:00'), 
+(3, '2022-02-03', '08:00:15', '13:15:00'), 
+(4, '2022-02-04', '14:00:00', '18:15:15'), 
+(5, '2022-02-05', '01:01:01', '01:01:02'); 
+
+insert into Restaurant values 
+('Restaurant1', 'restaurant1.com', '1 Princess Street', 'Kingston', 'K7K7K7', 1), 
+('Restaurant2', 'restaurant2.com', '2 Princess Street', 'Kingston', 'K8K8K8', 2), 
+('Restaurant3', 'restaurant3.com', '3 Princess Street', 'Kingston', 'K9K9K9', 3), 
+('Restaurant4', 'restaurant4.com', '4 Princess Street', 'Kingston', 'K0K0K0', 4), 
+('Restaurant5', 'restaurant5.com', '5 Princess Street', 'Kingston', 'L1L1L1', 5), 
+('Restaurant6', 'restaurant6.com', '6 Princess Street', 'Kingston', 'L2L2L2', 6); 
+
+insert into Menu values 
+('menu1', 'Restaurant1', 01.00), 
+('menu2', 'Restaurant1', 12.01),
+('menu1', 'Restaurant2', 9.99),
+('menu4', 'Restaurant2', 4.50),
+('menu5', 'Restaurant3', 10.05),
+('menu3', 'Restaurant2', 01.00); 
+
+insert into `Order` (customerID, restaurantID, tip, total_amount, order_date, deliveryID, delivery_time) values 
+('customer1@test.com', 'Restaurant1', 1.00, 13.01, '2023-03-27', 7, NULL), 
+('customer1@test.com', 'Restaurant2', 1.50, 11.49, '2023-03-01', 7, NULL), 
+('customer1@test.com', 'Restaurant1', 0.00, 13.01, '2023-03-01', NULL, NULL), 
+('customer2@test.com', 'Restaurant1', 1.00, 13.01, '2023-03-27', 7, NULL), 
+('customer3@test.com', 'Restaurant3', 0.00, 10.05, '2023-03-02', 7, NULL), 
+('customer4@test.com', 'Restaurant3', 0.50, 10.55, '2023-03-27', NULL, NULL) ; 
+
+insert into Order_Detail values 
+(1, 'Restaurant1', 'menu2'), 
+(3, 'Restaurant1', 'menu1'), 
+(3, 'Restaurant1', 'menu2'), 
+(2, 'Restaurant2', 'menu1'), 
+(4, 'Restaurant1', 'menu2'), 
+(5, 'Restaurant3', 'menu5'), 
+(6, 'Restaurant3', 'menu5'); 
